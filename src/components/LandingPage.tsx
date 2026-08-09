@@ -862,4 +862,3 @@ function Footer({ onLogin }: { onLogin: () => void }) {
     </footer>
   );
 }
-
