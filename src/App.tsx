@@ -1,8 +1,9 @@
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { useRoute } from '@/lib/router';
+import { NavProvider } from '@/lib/nav';
 import LandingPage from '@/components/LandingPage';
 import LoginPage from '@/components/LoginPage';
-import DashboardPage from '@/components/DashboardPage';
+import AppShell from '@/components/app/AppShell';
 
 function AppContent() {
   const [route, navigate] = useRoute();
@@ -10,34 +11,35 @@ function AppContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-sky-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-sky-200 border-t-sky-500 rounded-full animate-spin" />
+      <div className="min-h-screen bg-paper flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-line border-t-ink rounded-full animate-spin" />
       </div>
     );
   }
 
-  // Protect dashboard route — redirect to login if not signed in.
-  if (route === 'dashboard' && !session) {
+  // Protect the app — redirect to login if not signed in.
+  if (route === 'app' && !session) {
     navigate('login');
     return null;
   }
 
-  // If already signed in and on login page, go to dashboard.
+  // If already signed in and on login page, go to the app.
   if (route === 'login' && session) {
-    navigate('dashboard');
+    navigate('app');
     return null;
   }
 
   if (route === 'login') return <LoginPage />;
-  if (route === 'dashboard') return <DashboardPage />;
+  if (route === 'app') return <AppShell />;
   return <LandingPage />;
 }
 
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <NavProvider>
+        <AppContent />
+      </NavProvider>
     </AuthProvider>
   );
 }
-

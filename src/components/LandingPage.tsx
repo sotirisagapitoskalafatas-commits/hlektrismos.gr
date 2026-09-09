@@ -230,7 +230,7 @@ function Nav({ scrolled, menuOpen, setMenuOpen, onLogin }: {
 }
 
 /* ============================== Hero ============================== */
-function Hero({ scrollY, onLogin }: { scrollY: number; onLogin: () => void }) {
+function Hero({ scrollY }: { scrollY: number; onLogin: () => void }) {
   const parallax = (f: number) => `translateY(${scrollY * f}px)`;
   const rotate3d = `perspective(1000px) rotateX(${scrollY * 0.02}deg) rotateY(${scrollY * 0.01}deg)`;
   const heroOpacity = Math.max(0, 1 - scrollY / 600);

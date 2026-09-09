@@ -21,7 +21,7 @@ export default function LoginPage() {
     if (error) {
       setError('Λάθος στοιχεία. Ελέγξτε email και κωδικό.');
     } else {
-      navigate('dashboard');
+      navigate('app');
     }
   };
 

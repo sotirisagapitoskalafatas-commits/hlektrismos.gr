@@ -1,9 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Zap, LayoutDashboard, Users, Building2, Bot, LogOut, Plus, Search, Filter,
+  Zap, LayoutDashboard, Users, Building2, Bot, LogOut, Plus, Search,
   TrendingDown, Clock, Phone, Mail, Trash2, Edit3, X, Loader2, CheckCircle2,
-  AlertCircle, RefreshCw, Globe, Star, ArrowRight, Activity, Target, Sparkles,
-  ChevronDown, Download,
+  Globe, Star, ArrowRight, Activity, Target, Sparkles,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth';
