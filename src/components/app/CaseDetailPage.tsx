@@ -15,6 +15,7 @@ import {
   fetchFollowUps, fetchOffers, fetchSignatures, fetchTimeline, fetchVisits, getPosition,
   markOfferSent, setDocumentStatus, setSignatureStatus, snoozeFollowUp, uploadDocumentFile,
 } from '@/lib/api';
+import { SecureFileLink, useSignedUrl } from '@/lib/files';
 import {
   Btn, Card, CardHeader, EmptyState, Field, IconBtn, Micro, Modal, Pill, Spinner, StagePill,
   fmtDate, fmtDateTime, fmtMoney,
@@ -291,9 +292,9 @@ function DocumentsTab({ caseId }: { caseId: string }) {
               <div className="text-[13px] font-medium text-ink truncate">{d.description || d.file_name}</div>
               <div className="text-xs text-ink/45">{DOC_CATEGORIES[d.category] ?? d.category} · {fmtDateTime(d.created_at)}</div>
               {d.file_url && (
-                <a href={d.file_url} target="_blank" rel="noreferrer" className="text-xs text-brand-600 hover:underline inline-block mt-0.5">
+                <SecureFileLink fileRef={d.file_url} className="text-xs text-brand-600 hover:underline inline-block mt-0.5">
                   Άνοιγμα αρχείου ↗
-                </a>
+                </SecureFileLink>
               )}
             </div>
             <Pill tone={d.status === 'verified' ? 'green' : d.status === 'rejected' ? 'red' : 'amber'}>{DOC_STATUSES[d.status] ?? d.status}</Pill>
@@ -467,6 +468,13 @@ function OffersTab({ caseId }: { caseId: string }) {
 }
 
 /* ================= Signatures ================= */
+function SignatureThumb({ fileRef }: { fileRef: string }) {
+  const url = useSignedUrl(fileRef);
+  return url
+    ? <img src={url} alt="υπογραφή" className="w-9 h-9 rounded-lg object-contain bg-white border border-line shrink-0" />
+    : <span className="w-9 h-9 rounded-lg bg-white border border-line shrink-0" />;
+}
+
 function SignaturesTab({ caseId }: { caseId: string }) {
   const { role } = useAuth();
   const [items, setItems] = useState<CaseSignature[]>([]);
@@ -495,7 +503,7 @@ function SignaturesTab({ caseId }: { caseId: string }) {
         {items.map(s => (
           <div key={s.id} className="flex items-center gap-3 p-3 rounded-xl border border-line bg-paper/50 flex-wrap">
             {s.image_url
-              ? <img src={s.image_url} alt="υπογραφή" className="w-9 h-9 rounded-lg object-contain bg-white border border-line shrink-0" />
+              ? <SignatureThumb fileRef={s.image_url} />
               : <span className="w-9 h-9 rounded-lg bg-white border border-line flex items-center justify-center shrink-0"><PenLine className="w-4 h-4 text-ink/50" /></span>}
             <div className="flex-1 min-w-[140px]">
               <div className="text-[13px] font-medium text-ink">{s.notes || 'Υπογραφή πελάτη'}</div>

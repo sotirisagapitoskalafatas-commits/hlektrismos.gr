@@ -19,7 +19,6 @@ interface AuthContextValue {
   role: Role;
   setRoleOverride: (r: Role) => void;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -65,15 +64,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (session?.user) refreshProfile();
   }, [session?.user, refreshProfile]);
 
+  // No self-service sign-up: staff accounts are created by an admin in the
+  // Supabase dashboard, and public sign-ups must stay disabled there (Auth >
+  // Providers > Email > "Allow new users to sign up" = off). Any future
+  // public sign-up flow must add a server-validated age check first.
   const signIn = async (email: string, password: string) => {
     if (!supabase) return { error: 'Database not configured' };
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
-  };
-
-  const signUp = async (email: string, password: string) => {
-    if (!supabase) return { error: 'Database not configured' };
-    const { error } = await supabase.auth.signUp({ email, password });
     return { error: error?.message ?? null };
   };
 
@@ -100,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role,
         setRoleOverride,
         signIn,
-        signUp,
         signOut,
         refreshProfile,
       }}

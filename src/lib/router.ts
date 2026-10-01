@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 
-export type Route = 'landing' | 'login' | 'app';
+export type Route = 'landing' | 'login' | 'app' | 'privacy' | 'terms';
+
+const ROUTES: Record<string, Route> = {
+  '/login': 'login',
+  '/app': 'app',
+  '/privacy': 'privacy',
+  '/terms': 'terms',
+};
+
+function parse(): Route {
+  return ROUTES[window.location.hash.slice(1)] ?? 'landing';
+}
 
 export function useRoute(): [Route, (r: Route) => void] {
-  const [route, setRoute] = useState<Route>(() => {
-    const hash = window.location.hash.slice(1);
-    if (hash === '/login') return 'login';
-    if (hash === '/app') return 'app';
-    return 'landing';
-  });
+  const [route, setRoute] = useState<Route>(parse);
 
   useEffect(() => {
     const handler = () => {
-      const hash = window.location.hash.slice(1);
-      if (hash === '/login') setRoute('login');
-      else if (hash === '/app') setRoute('app');
-      else setRoute('landing');
+      setRoute(parse());
       window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', handler);

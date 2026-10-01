@@ -9,25 +9,28 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRoute } from '@/lib/router';
+import { pexels } from '@/lib/media';
+import { readConsent, saveConsent, useConsent, openConsentSettings } from '@/lib/consent';
+import { COMPANY } from '@/lib/legal';
 
-const PHONE = '+30 210 22 55 000';
-const EMAIL = 'info@hlektrismos.gr';
-const ADDRESS = 'Ζαλοκώστα 8, Αθήνα Τ.Κ. 10671';
+const PHONE = COMPANY.phone;
+const EMAIL = COMPANY.email;
+const ADDRESS = COMPANY.address;
 
-const SATELLITE_BG = 'https://images.pexels.com/photos/33909968/pexels-photo-33909968.jpeg?auto=compress&cs=tinysrgb&w=1920';
-const AERIAL_KERKIRA = 'https://images.pexels.com/photos/9213281/pexels-photo-9213281.jpeg?auto=compress&cs=tinysrgb&w=1920';
+const SATELLITE_BG = pexels(33909968, 1920);
+const AERIAL_KERKIRA = pexels(9213281, 1920);
 
 const PEOPLE = [
-  { img: 'https://images.pexels.com/photos/6392968/pexels-photo-6392968.jpeg?auto=compress&cs=tinysrgb&w=600', name: 'Μαρία', role: 'Νοικοκυρά', quote: 'Έκοψα τον λογαριασμό μου κατά 30% — χωρίς κανένα κόπο.', icon: Home },
-  { img: 'https://images.pexels.com/photos/17582358/pexels-photo-17582358.jpeg?auto=compress&cs=tinysrgb&w=600', name: 'Γιάννης', role: 'Επιχειρηματίας', quote: 'Η επιχείρησή μου εξοικονομεί χιλιάδες ευρώ τον χρόνο.', icon: Building2 },
-  { img: 'https://images.pexels.com/photos/21812143/pexels-photo-21812143.jpeg?auto=compress&cs=tinysrgb&w=600', name: 'Νίκος', role: 'Ηλεκτρολόγος', quote: 'Εγκαθιστώ φωτοβολταϊκά σε όλη την Αττική — άριστη συνεργασία.', icon: Wrench },
+  { img: pexels(6392968, 600), name: 'Μαρία', role: 'Νοικοκυρά', quote: 'Έκοψα τον λογαριασμό μου κατά 30% — χωρίς κανένα κόπο.', icon: Home },
+  { img: pexels(17582358, 600), name: 'Γιάννης', role: 'Επιχειρηματίας', quote: 'Η επιχείρησή μου εξοικονομεί χιλιάδες ευρώ τον χρόνο.', icon: Building2 },
+  { img: pexels(21812143, 600), name: 'Νίκος', role: 'Ηλεκτρολόγος', quote: 'Εγκαθιστώ φωτοβολταϊκά σε όλη την Αττική — άριστη συνεργασία.', icon: Wrench },
 ];
 
 const SHOWCASE = [
-  { img: 'https://images.pexels.com/photos/24449044/pexels-photo-24449044.jpeg?auto=compress&cs=tinysrgb&w=800', title: 'Σπίτια', desc: 'Εξατομικευμένα προγράμματα ρεύματος για κάθε νοικοκυριό.', icon: Home, stats: 'Έως 30% εξοικονόμηση' },
-  { img: 'https://images.pexels.com/photos/9875415/pexels-photo-9875415.jpeg?auto=compress&cs=tinysrgb&w=800', title: 'Φωτοβολταϊκά', desc: 'Εγκατάσταση ηλιακών πάνελ σε στέγες και αυλές.', icon: Sun, stats: 'Άξοια απόδοση 25 χρόνια' },
-  { img: 'https://images.pexels.com/photos/34674788/pexels-photo-34674788.jpeg?auto=compress&cs=tinysrgb&w=800', title: 'Επιχειρήσεις', desc: 'Συμβόλαια προμήθειας για καταστήματα και γραφεία.', icon: Building2, stats: 'Άμεση ενεργοποίηση 7 ημέρες' },
-  { img: 'https://images.pexels.com/photos/21822434/pexels-photo-21822434.jpeg?auto=compress&cs=tinysrgb&w=800', title: 'Πράσινη Ενέργεια', desc: 'Αιολική και ηλιακή ενέργεια από ελληνικά βουνά.', icon: Leaf, stats: '100% ανανεώσιμες πηγές' },
+  { img: pexels(24449044, 800), title: 'Σπίτια', desc: 'Εξατομικευμένα προγράμματα ρεύματος για κάθε νοικοκυριό.', icon: Home, stats: 'Έως 30% εξοικονόμηση' },
+  { img: pexels(9875415, 800), title: 'Φωτοβολταϊκά', desc: 'Εγκατάσταση ηλιακών πάνελ σε στέγες και αυλές.', icon: Sun, stats: 'Άξοια απόδοση 25 χρόνια' },
+  { img: pexels(34674788, 800), title: 'Επιχειρήσεις', desc: 'Συμβόλαια προμήθειας για καταστήματα και γραφεία.', icon: Building2, stats: 'Άμεση ενεργοποίηση 7 ημέρες' },
+  { img: pexels(21822434, 800), title: 'Πράσινη Ενέργεια', desc: 'Αιολική και ηλιακή ενέργεια από ελληνικά βουνά.', icon: Leaf, stats: '100% ανανεώσιμες πηγές' },
 ];
 
 const JOURNEY_STOPS = [
@@ -313,6 +316,7 @@ function GreeceJourney() {
   const [activeStop, setActiveStop] = useState(0);
   const [progress, setProgress] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const mapsAllowed = useConsent().choices.externalMedia;
 
   const customIcon = useMemo(() => L.divIcon({ className: 'custom-marker', html: '<div class="marker-pulse"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), []);
   const activeIcon = useMemo(() => L.divIcon({ className: 'custom-marker', html: '<div class="marker-pulse marker-active"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), []);
@@ -323,11 +327,6 @@ function GreeceJourney() {
       center: [39.5, 23.5], zoom: 6, zoomControl: true, attributionControl: true,
       scrollWheelZoom: false, dragging: true, doubleClickZoom: true, boxZoom: false, keyboard: false,
     });
-    // Esri World Imagery — real satellite tiles
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: '&copy; Esri, Maxar, Earthstar Geographics',
-      maxZoom: 18,
-    }).addTo(map);
     JOURNEY_STOPS.forEach((stop) => {
       const marker = L.marker([stop.lat, stop.lng], { icon: customIcon })
         .addTo(map)
@@ -338,6 +337,18 @@ function GreeceJourney() {
     setTimeout(() => map.invalidateSize(), 100);
     return () => { map.remove(); mapRef.current = null; markersRef.current = []; };
   }, [customIcon]);
+
+  // Esri World Imagery tiles send the visitor's IP to Esri, so they are only
+  // requested after opt-in consent for external media (see lib/consent.ts).
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapsAllowed) return;
+    const tiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; Esri, Maxar, Earthstar Geographics',
+      maxZoom: 18,
+    }).addTo(map);
+    return () => { tiles.remove(); };
+  }, [mapsAllowed]);
 
   useEffect(() => {
     let raf = 0;
@@ -386,6 +397,13 @@ function GreeceJourney() {
         <div className="relative grid lg:grid-cols-[1fr_380px] gap-8 items-start perspective-container">
           <div className="relative rounded-3xl glass-card overflow-hidden" style={{ minHeight: '500px' }}>
             <div ref={mapContainerRef} className="w-full h-[500px] lg:h-[600px] rounded-3xl" />
+            {!mapsAllowed && (
+              <div className="absolute inset-0 z-[500] flex flex-col items-center justify-center gap-3 rounded-3xl bg-slate-900/80 text-center p-6">
+                <p className="text-white/90 text-sm max-w-sm">Ο δορυφορικός χάρτης φορτώνεται από την Esri, που θα λάβει τη διεύθυνση IP σας.</p>
+                <button onClick={() => saveConsent({ ...readConsent()?.choices, externalMedia: true })}
+                  className="px-5 py-2 rounded-full bg-white text-slate-900 font-semibold text-sm">Φόρτωση χάρτη</button>
+              </div>
+            )}
             <div className="absolute inset-0 rounded-3xl pointer-events-none" style={{
               transform: `perspective(1000px) rotateX(${Math.min(progress * 8, 4)}deg)`,
               transformOrigin: 'center bottom',
@@ -714,6 +732,10 @@ function Comparison() {
             </div>
           ))}
         </div>
+        <p className="mt-8 text-center text-xs text-slate-500 max-w-2xl mx-auto">
+          Ενδεικτικές τιμές προμήθειας ανά kWh, πριν από ρυθμιζόμενες χρεώσεις, ΦΠΑ και φόρους. Η συμβουλευτική μας είναι δωρεάν και
+          δεν περιλαμβάνει συνδρομή. Δεσμευτικοί είναι μόνο οι όροι της σύμβασης που υπογράφετε με τον πάροχο.
+        </p>
       </div>
     </section>
   );
@@ -783,6 +805,10 @@ function FAQ({ faqs }: { faqs: typeof FAQS }) {
 /* ============================== Lead Form ============================== */
 function LeadForm() {
   const [form, setForm] = useState({ full_name: '', phone: '', email: '', service_type: 'electricity', property_type: 'home', notes: '' });
+  // Age confirmation is checked here AND enforced by a CHECK constraint on
+  // public.leads (supabase/migrations/*_legal_compliance.sql): an insert
+  // without age_confirmed = true is rejected and nothing is stored.
+  const [isAdult, setIsAdult] = useState(false);
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const { ref, visible } = useReveal<HTMLDivElement>();
@@ -790,17 +816,20 @@ function LeadForm() {
   const submit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.full_name || !form.phone) { setStatus('error'); setErrorMsg('Συμπλήρωσε όνομα και τηλέφωνο.'); return; }
+    if (!isAdult) { setStatus('error'); setErrorMsg('Η φόρμα απευθύνεται μόνο σε ενήλικες (18+).'); return; }
     setStatus('loading');
     if (supabase) {
       const { error } = await supabase.from('leads').insert({
         full_name: form.full_name, phone: form.phone, email: form.email || null,
         service_type: form.service_type, property_type: form.property_type, notes: form.notes || null,
+        age_confirmed: true,
       });
       if (error) { setStatus('error'); setErrorMsg('Παρουσιάστηκε σφάλμα. Δοκιμάστε ξανά.'); return; }
     }
     setStatus('success');
     setForm({ full_name: '', phone: '', email: '', service_type: 'electricity', property_type: 'home', notes: '' });
-  }, [form]);
+    setIsAdult(false);
+  }, [form, isAdult]);
 
   return (
     <section id="lead" className="relative py-24 md:py-32 z-10">
@@ -844,7 +873,7 @@ function LeadForm() {
                 </div>
                 <div className="sm:col-span-1">
                   <label className="block text-sm text-slate-600 mb-2 font-medium">Email</label>
-                  <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                  <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl bg-white/60 border border-slate-200 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200 transition-all text-slate-900"
                     placeholder="email@example.com" />
                 </div>
@@ -872,6 +901,14 @@ function LeadForm() {
                     className="w-full px-4 py-3 rounded-xl bg-white/60 border border-slate-200 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200 transition-all text-slate-900"
                     placeholder="Μηνιαία κατανάλωση, Τ.Κ., κλπ." />
                 </div>
+                <label className="sm:col-span-2 flex items-start gap-2 text-sm text-slate-600">
+                  <input type="checkbox" required checked={isAdult} onChange={e => setIsAdult(e.target.checked)} className="mt-1" />
+                  <span>Δηλώνω ότι είμαι ενήλικας (18 ετών και άνω). *</span>
+                </label>
+                <p className="sm:col-span-2 text-xs text-slate-500">
+                  Θα χρησιμοποιήσουμε τα στοιχεία σας μόνο για να επικοινωνήσουμε μαζί σας για αυτό το αίτημα.
+                  Δείτε την <a href="#/privacy" className="text-sky-600 underline">Πολιτική Απορρήτου</a>.
+                </p>
                 {status === 'error' && <div className="sm:col-span-2 text-red-500 text-sm">{errorMsg}</div>}
                 <button type="submit" disabled={status === 'loading'}
                   className="sm:col-span-2 mt-2 flex items-center justify-center gap-2 py-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-semibold text-lg hover:shadow-xl hover:shadow-sky-500/30 transition-all disabled:opacity-60">
@@ -950,7 +987,12 @@ function Footer({ onLogin }: { onLogin: () => void }) {
         </div>
         <div className="pt-8 border-t border-slate-200/60 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <span>© {new Date().getFullYear()} Ηlektrismos.gr — Όλα τα δικαιώματα διατηρούνται.</span>
-          <button onClick={onLogin} className="hover:text-sky-600 transition-colors">Σύνδεση CRM</button>
+          <nav className="flex flex-wrap items-center gap-4">
+            <a href="#/privacy" className="hover:text-sky-600 transition-colors">Πολιτική Απορρήτου</a>
+            <a href="#/terms" className="hover:text-sky-600 transition-colors">Όροι Χρήσης</a>
+            <button onClick={openConsentSettings} className="hover:text-sky-600 transition-colors">Ρυθμίσεις απορρήτου</button>
+            <button onClick={onLogin} className="hover:text-sky-600 transition-colors">Σύνδεση CRM</button>
+          </nav>
         </div>
       </div>
     </footer>

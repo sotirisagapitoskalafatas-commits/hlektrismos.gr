@@ -168,8 +168,16 @@ export type Lead = {
 };
 
 function logError(method: string, err: unknown) {
+  // Supabase/PostgREST errors can echo row values (e.g. "Key (phone)=(69…)
+  // already exists"). Production builds log only the error code, never details.
+  if (import.meta.env.DEV) {
+    // eslint-disable-next-line no-console
+    console.error(`[atlas.api] ${method}:`, err);
+    return;
+  }
+  const code = (err as { code?: string } | null)?.code ?? 'unknown';
   // eslint-disable-next-line no-console
-  console.error(`[atlas.api] ${method}:`, err);
+  console.error(`[atlas.api] ${method}: error ${code}`);
 }
 
 /* ---------------- Profiles ---------------- */
@@ -563,8 +571,24 @@ export async function uploadDocumentFile(file: File): Promise<{ url: string; nam
   const path = `cases/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
   const { error } = await supabase.storage.from('client_documents').upload(path, file, { upsert: false });
   if (error) { logError('uploadDocumentFile', error); return null; }
-  const { data: urlData } = supabase.storage.from('client_documents').getPublicUrl(path);
-  return { url: urlData.publicUrl, name: file.name, mime: file.type, size: file.size };
+  // Customer IDs, bills and signatures: never hand out a permanent public URL.
+  // Store a storage reference and resolve it to a short-lived signed URL on view.
+  return { url: `${STORAGE_REF}${path}`, name: file.name, mime: file.type, size: file.size };
+}
+
+const STORAGE_REF = 'storage://client_documents/';
+const LEGACY_PUBLIC = '/storage/v1/object/public/client_documents/';
+
+/** Turns a stored file reference (or a legacy public URL) into a signed URL valid for 5 minutes. */
+export async function resolveFileUrl(ref: string): Promise<string | null> {
+  if (!supabase || !ref) return null;
+  let path: string | null = null;
+  if (ref.startsWith(STORAGE_REF)) path = ref.slice(STORAGE_REF.length);
+  else if (ref.includes(LEGACY_PUBLIC)) path = decodeURIComponent(ref.split(LEGACY_PUBLIC)[1].split('?')[0]);
+  if (!path) return ref;
+  const { data, error } = await supabase.storage.from('client_documents').createSignedUrl(path, 300);
+  if (error) { logError('resolveFileUrl', error); return null; }
+  return data.signedUrl;
 }
 
 /* ---------------- Visits / check in-out ---------------- */

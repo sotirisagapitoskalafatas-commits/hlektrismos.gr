@@ -4,6 +4,8 @@ import { NavProvider } from '@/lib/nav';
 import LandingPage from '@/components/LandingPage';
 import LoginPage from '@/components/LoginPage';
 import AppShell from '@/components/app/AppShell';
+import LegalPage from '@/components/LegalPage';
+import ConsentBanner from '@/components/ConsentBanner';
 
 function AppContent() {
   const [route, navigate] = useRoute();
@@ -31,7 +33,12 @@ function AppContent() {
 
   if (route === 'login') return <LoginPage />;
   if (route === 'app') return <AppShell />;
-  return <LandingPage />;
+  return (
+    <>
+      {route === 'privacy' || route === 'terms' ? <LegalPage page={route} /> : <LandingPage />}
+      <ConsentBanner />
+    </>
+  );
 }
 
 export default function App() {

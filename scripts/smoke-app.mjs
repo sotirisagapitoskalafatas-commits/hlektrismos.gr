@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer-core';
 
 const BASE = process.env.SMOKE_BASE ?? 'http://localhost:4173';
 const EDGE = process.env.SMOKE_EDGE ?? 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const DEMO_EMAIL = 'demo@hlektrismos.gr';
+const DEMO_EMAIL = process.env.SMOKE_EMAIL ?? '';
 
 const results = [];
 let ok = (name, fn) => (async () => {
@@ -42,8 +42,9 @@ async function login(page) {
   }
   const emailField = await page.$('input[type=email]');
   const passField = await page.$('input[type=password]');
-  const demoPassword = await passField.evaluate(el => el && el.value ? el.value : '');
-  if (!demoPassword) throw new Error('[login-diag] demo password field is empty');
+  // Credentials come from the environment; they are never shipped in the UI.
+  const demoPassword = process.env.SMOKE_PASSWORD ?? '';
+  if (!DEMO_EMAIL || !demoPassword) throw new Error('[login-diag] set SMOKE_EMAIL and SMOKE_PASSWORD');
 
   await fillInput(page, emailField, DEMO_EMAIL);
   await fillInput(page, passField, demoPassword);
